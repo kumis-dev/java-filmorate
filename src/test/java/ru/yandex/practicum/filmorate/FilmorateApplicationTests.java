@@ -23,7 +23,7 @@ public class FilmorateApplicationTests {
 		film.setName("movie");
 		film.setDescription("description");
 		film.setReleaseDate(LocalDate.of(2002, 4, 14));
-		film.setDuration(Duration.ofMinutes(125));
+		film.setDuration(125);
 	}
 
 	@Test
@@ -55,7 +55,7 @@ public class FilmorateApplicationTests {
 
 	@Test
 	void shouldReturnValidationExceptionWith0Duration() {
-		film.setDuration(Duration.ofMinutes(0));
+		film.setDuration(0);
 		ValidationException e = assertThrows(ValidationException.class, () -> controller.create(film));
 		assertTrue(e.getMessage().contains("Продолжительность фильма должна быть положительным числом"));
 	}
@@ -94,7 +94,7 @@ public class FilmorateApplicationTests {
 		assertTrue(film.getId() > 0);
 		assertEquals(film.getDescription(),"description");
 		assertEquals(film.getName(), "movie");
-		assertEquals(film.getDuration(), Duration.ofMinutes(125));
+		assertEquals(125, film.getDuration());
 		assertEquals(film.getReleaseDate(), LocalDate.of(2002, 4, 14));
 	}
 
@@ -105,7 +105,7 @@ public class FilmorateApplicationTests {
 		film.setName("movie2");
 		film.setDescription("description2");
 		film.setReleaseDate(LocalDate.of(2004, 2, 11));
-		film.setDuration(Duration.ofMinutes(133));
+		film.setDuration(133);
 
 		Film updateFilm = controller.update(film);
 		// id не изменился
@@ -114,12 +114,12 @@ public class FilmorateApplicationTests {
 		assertEquals(updateFilm.getName(), "movie2");
 		assertEquals(updateFilm.getDescription(), "description2");
 		assertEquals(updateFilm.getReleaseDate(), LocalDate.of(2004, 2, 11));
-		assertEquals(updateFilm.getDuration(), Duration.ofMinutes(133));
+		assertEquals(133, updateFilm.getDuration());
 	}
 
 	@Test
 	void shouldReturnValidationExceptionWithNegativeDuration() {
-		film.setDuration(Duration.ofMinutes(-2));
+		film.setDuration(-2);
 		assertThrows(ValidationException.class, () -> controller.create(film));
 	}
 }
