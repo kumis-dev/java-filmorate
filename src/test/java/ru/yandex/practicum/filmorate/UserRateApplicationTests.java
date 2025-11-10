@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 
@@ -12,11 +15,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserRateApplicationTests {
     UserController controller;
+    UserService userService;
+    UserStorage userStorage;
     User user;
 
     @BeforeEach
     public void setUp() {
-        controller = new UserController();
+        userStorage = new InMemoryUserStorage();
+        userService = new UserService(userStorage);
+        controller = new UserController(userService);
         user = new User();
         user.setEmail("dxdkymis@mail.ru");
         user.setLogin("alpha");
