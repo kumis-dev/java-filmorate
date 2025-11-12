@@ -29,6 +29,9 @@ public class FilmController {
 
     @PutMapping
     public Film update(@Valid @RequestBody Film newFilm) {
+        if (newFilm.getId() == null) {
+            throw new ru.yandex.practicum.filmorate.exceptions.NotFoundException();
+        }
         return filmService.update(newFilm);
     }
 
@@ -55,6 +58,4 @@ public class FilmController {
                                  int size) {
         return filmService.getPopular(size);
     }
-    // и все из сервиса тоже перенеси эндпоинты
-    // также не забудь добавить ErrorHandler
 }
