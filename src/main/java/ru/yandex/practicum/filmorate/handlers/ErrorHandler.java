@@ -6,19 +6,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UpdateTargetNotFoundValidationException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-
-    // Самые специфичные исключения - ПЕРВЫМИ
-    @ExceptionHandler(UpdateTargetNotFoundValidationException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND) // 404
-    public ErrorResponse handleUpdateTargetMissing(UpdateTargetNotFoundValidationException e) {
-        return new ErrorResponse(e.getMessage());
-    }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND) // 404

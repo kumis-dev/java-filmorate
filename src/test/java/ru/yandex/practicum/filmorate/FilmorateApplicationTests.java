@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -77,14 +78,14 @@ public class FilmorateApplicationTests {
 	}
 
 	@Test
-	void shouldReturnValidationExceptionWithNotFoundId() {
+	void shouldReturnValidationAndNotFoundExceptionWithNotFoundId() {
 		film.setId(null);
 		ValidationException e = assertThrows(ValidationException.class, () -> controller.update(film));
-		assertTrue(e.getMessage().contains("не найден"));
+		assertTrue(e.getMessage().contains("Некорректный"));
 
 		film.setId(11111L);
-		e = assertThrows(ValidationException.class, () -> controller.update(film));
-		assertTrue(e.getMessage().contains("не найден"));
+		NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> controller.update(film));
+		assertTrue(notFoundException.getMessage().contains("не найден"));
 	}
 
 	@Test

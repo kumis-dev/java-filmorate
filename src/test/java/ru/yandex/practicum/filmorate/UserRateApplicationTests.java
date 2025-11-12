@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -62,14 +63,14 @@ public class UserRateApplicationTests {
     }
 
     @Test
-    void shouldReturnValidationExceptionWithNotFoundId() {
+    void shouldReturnValidationAndNotFoundExceptionWithNotFoundId() {
         user.setId(null);
         ValidationException e = assertThrows(ValidationException.class, () -> controller.update(user));
-        assertTrue(e.getMessage().contains("не найден"));
+        assertTrue(e.getMessage().contains("Некорректный"));
 
         user.setId(11111L);
-        e = assertThrows(ValidationException.class, () -> controller.update(user));
-        assertTrue(e.getMessage().contains("не найден"));
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> controller.update(user));
+        assertTrue(notFoundException.getMessage().contains("не найден"));
     }
 
     @Test

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UpdateTargetNotFoundValidationException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -37,10 +36,16 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        validateId(film.getId());
+        // Проверяем null отдельно с нужным текстом
+        if (film.getId() == null) {
+            log.warn("Некорректный id: null");
+            throw new ValidationException("Некорректный id: id должен быть указан");
+        }
+
+        // Проверяем существование
         if (filmStorage.findById(film.getId()).isEmpty()) {
             log.warn("Обновление фильма: не существует id={}", film.getId());
-            throw new UpdateTargetNotFoundValidationException("Фильм с таким id не найден");
+            throw new NotFoundException("Фильм с id=" + film.getId() + " не найден");
         }
 
         Film updateFilm = filmStorage.update(film);

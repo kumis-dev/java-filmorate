@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exceptions.UpdateTargetNotFoundValidationException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -33,10 +32,14 @@ public class UserService {
     }
 
     public User update(User user) {
-        validateId(user.getId());
+        if (user.getId() == null) {
+            log.warn("Некорректный id: null");
+            throw new ValidationException("Некорректный id: id должен быть указан");
+        }
+
         if (userStorage.findById(user.getId()).isEmpty()) {
             log.warn("Обновление пользователя: не существует id={}", user.getId());
-            throw new UpdateTargetNotFoundValidationException("Пользователь с таким id не найден");
+            throw new NotFoundException("Пользователь с id=" + user.getId() + " не найден");
         }
         User updateUser = userStorage.update(user);
         log.info("Обновлен пользователь с id {}: ", updateUser.getId());
