@@ -32,28 +32,33 @@ public class UserService {
     }
 
     public User update(User user) {
+        validateId(user.getId());
+        userStorage.findById(user.getId()).orElseThrow(() -> notFoundUser(user.getId()));
         User updateUser = userStorage.update(user);
         log.info("Обновлен пользователь с id {}: ", updateUser.getId());
         return updateUser;
     }
 
     public User findById(Long id) {
+        validateId(id);
         User findUserById = userStorage.findById(id).orElseThrow(() -> notFoundUser(id));
         log.debug("Найден пользователь: {}", findUserById);
         return findUserById;
     }
 
     public void delete(Long id) {
+        validateId(id);
         userStorage.delete(id);
         log.info("Пользователь успешно удален");
     }
 
     // PUT /users/{id}/friends/{friendId}
     public void addFriend(Long userId, Long friendId) {
-        if (userId == null || friendId == null)
-            throw new ValidationException("id не указан");
+        validateId(userId);
+        validateId(friendId);
         if (userId.equals(friendId))
             throw new ValidationException("Нельзя добавить себя в друзья");
+
         User user = userStorage.findById(userId).orElseThrow(() -> notFoundUser(userId));
         User friend = userStorage.findById(friendId).orElseThrow(() ->
                 notFoundFriend(friendId));
@@ -65,8 +70,8 @@ public class UserService {
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        if (userId == null || friendId == null)
-            throw new ValidationException("id не указан");
+        validateId(userId);
+        validateId(friendId);
         User user = userStorage.findById(userId).orElseThrow(() -> notFoundUser(userId));
         User friend = userStorage.findById(friendId).orElseThrow(() ->
                 notFoundFriend(friendId));
@@ -108,5 +113,12 @@ public class UserService {
     private NotFoundException notFoundFriend(Long friendId) {
         log.warn("Друг пользователя не найден, его id: {}", friendId);
         return new NotFoundException();
+    }
+
+    private void validateId(Long id) {
+        if (id == null || id <= 0) {
+            log.warn("Некорректный id: {}", id);
+            throw new ValidationException("id должен быть > 0");
+        }
     }
 }
