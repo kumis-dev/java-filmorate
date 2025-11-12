@@ -27,6 +27,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User newUser) {
+        if (newUser.getId() == null || newUser.getId() <= 0) {
+            log.warn("Ошибка валидации пользователя: некорректный id={}", newUser.getId());
+            throw new ValidationException("id должен быть > 0");
+        }
         validate(newUser);
         User oldUser = users.get(newUser.getId());
         if (newUser.getEmail() != null && !newUser.getEmail().isBlank())

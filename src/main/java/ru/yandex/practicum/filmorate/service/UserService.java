@@ -83,6 +83,7 @@ public class UserService {
     }
 
     public List<User> getAllFriends(Long userId) {
+        validateId(userId);
         // сначала находим юзера по айди
         User user = userStorage.findById(userId).orElseThrow(() -> notFoundUser(userId));
         // затем проходимся стримом по его друзьям и собираем их в список
@@ -93,6 +94,8 @@ public class UserService {
 
     // здесь будет выводиться общий список друзей
     public List<User> getCommonFriends(Long userId, Long otherId) {
+        validateId(userId);
+        validateId(otherId);
         User user = userStorage.findById(userId).orElseThrow(() -> notFoundUser(userId));
         User friend = userStorage.findById(otherId).orElseThrow(() ->
                 notFoundFriend(otherId));

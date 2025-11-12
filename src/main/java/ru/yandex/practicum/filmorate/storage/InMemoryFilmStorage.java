@@ -25,6 +25,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film newFilm) {
+        if (newFilm.getId() == null || newFilm.getId() <= 0) {
+            log.warn("Ошибка валидации фильма: некорректный id={}", newFilm.getId());
+            throw new ValidationException("id должен быть > 0");
+        }
         validate(newFilm);
         Film oldFilm = films.get(newFilm.getId());
         // если фильм найден и все условия соблюдены, обновляем его содержимое
