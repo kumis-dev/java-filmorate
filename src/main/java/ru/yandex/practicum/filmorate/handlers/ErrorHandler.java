@@ -33,7 +33,7 @@ public class ErrorHandler {
     @ExceptionHandler(UpdateTargetNotFoundValidationException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND) // 404 для апдейта несуществующего ресурса
     public ErrorResponse handleUpdateTargetMissing(UpdateTargetNotFoundValidationException e) {
-        return new ErrorResponse (e.getMessage());
+        return new ErrorResponse(e.getMessage());
     }
 
 }
