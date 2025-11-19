@@ -16,13 +16,14 @@ FROM films AS f
 JOIN rating AS r ON f.rating_id = r.rating_id;
 ```
 
-# Все жанры конкретного фильма
+# Все жанры конкретного фильма с id 1
 ```
 SELECT
     g.genre_name
 FROM film_genres AS fg
 JOIN genres AS g ON fg.genre_id = g.genre_id
-WHERE fg.film_id =  :film_id;
+WHERE fg.film_id = 1;
+
 ```
 
 # Топ-5 самых популярных фильмов по количеству лайков
