@@ -14,4 +14,10 @@ public class Film {
     private LocalDate releaseDate;
     private Integer duration;
     private Set<Long> likes = new HashSet<>();
+    private Set<String> genres = new HashSet<>();
+    private MpaRating mpaRating;
+}
+
+enum MpaRating {
+    G, PG, PG_13, R, NC_17
 }

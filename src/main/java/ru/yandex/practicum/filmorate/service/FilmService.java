@@ -36,6 +36,12 @@ public class FilmService {
     }
 
     public Film update(Film film) {
+        if (film.getId() == null || film.getId() <= 0) {
+            log.warn("Некорректный id: {}", film.getId());
+            throw new ValidationException("id должен быть > 0");
+        }
+        filmStorage.findById(film.getId()).orElseThrow(() -> notFoundFilm(film.getId()));
+
         Film updateFilm = filmStorage.update(film);
         log.info("Обновлен фильм: {}", updateFilm.getId());
         return updateFilm;

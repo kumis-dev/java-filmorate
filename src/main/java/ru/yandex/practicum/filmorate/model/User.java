@@ -14,4 +14,9 @@ public class User {
     private String name;
     private LocalDate birthday;
     private Set<Long> friends = new HashSet<>();
+    private FriendshipStatus friendshipStatus;
+}
+
+enum FriendshipStatus {
+    UNCONFIRMED, CONFIRMED
 }
