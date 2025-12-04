@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface RatingStorage {
     List<MpaRating> findAll();
+
     Optional<MpaRating> findById(int id);
 }
