@@ -43,4 +43,8 @@ build/
 .vscode/
 
 *.db
-db/*
+db/*target/
+*.class
+*.jar
+.DS_Store
+db/
