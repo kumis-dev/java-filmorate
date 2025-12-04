@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -26,12 +25,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film newFilm) {
-        if (newFilm.getId() == null) {
-            log.warn("Ошибка валидации фильма");
-            throw new ValidationException("Фильм с id = " + newFilm.getId() + " не найден");
+        if (newFilm.getId() == null || newFilm.getId() <= 0) {
+            log.warn("Ошибка валидации фильма: некорректный id={}", newFilm.getId());
+            throw new ValidationException("id должен быть > 0");
         }
-        if (!films.containsKey(newFilm.getId()))
-            throw new NotFoundException();
         validate(newFilm);
         Film oldFilm = films.get(newFilm.getId());
         // если фильм найден и все условия соблюдены, обновляем его содержимое

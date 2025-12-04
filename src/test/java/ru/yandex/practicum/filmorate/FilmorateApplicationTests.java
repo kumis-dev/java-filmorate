@@ -98,7 +98,7 @@ public class FilmorateApplicationTests {
 	}
 
 	@Test
-	void shouldReturnValidationExceptionWithNotFoundId() {
+	void shouldReturnValidationAndNotFoundExceptionWithNotFoundId() {
 		film.setId(null);
 		ValidationException e = assertThrows(ValidationException.class, () -> updateFilm(film));
 		assertTrue(e.getMessage().contains("Некорректный id"));

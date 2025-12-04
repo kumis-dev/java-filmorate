@@ -61,6 +61,7 @@ public class UserService {
 
 
     public void delete(Long id) {
+        validateId(id);
         userStorage.delete(id);
     }
 
@@ -134,6 +135,13 @@ public class UserService {
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
+        }
+    }
+
+    private void validateId(Long id) {
+        if (id == null || id <= 0) {
+            log.warn("Некорректный id: {}", id);
+            throw new ValidationException("id должен быть > 0");
         }
     }
 }
