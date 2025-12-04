@@ -33,7 +33,7 @@ public class InMemoryUserStorage implements UserStorage {
             throw new ValidationException("Пользователь с id = " + newUser.getId() + " не найден");
         }
         if (!users.containsKey(newUser.getId()))
-            throw new NotFoundException();
+            throw new NotFoundException("id не найден");
         validate(newUser);
         User oldUser = users.get(newUser.getId());
         if (newUser.getEmail() != null && !newUser.getEmail().isBlank())
@@ -68,6 +68,49 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Optional<User> findById(Long id) {
         return Optional.ofNullable(users.get(id));
+    }
+
+    @Override
+    public void addFriend(Long userId, Long friendId) {
+        User user = findById(userId).orElseThrow();
+        User friend = findById(friendId).orElseThrow();
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+    }
+
+    @Override
+    public void removeFriend(Long userId, Long friendId) {
+        User user = findById(userId).orElseThrow();
+        User friend = findById(friendId).orElseThrow();
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+    }
+
+    @Override
+    public void loadFriends(User user) {
+
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(Long userId, Long otherId) {
+        User user = findById(userId).orElseThrow();
+        User other = findById(otherId).orElseThrow();
+        Set<Long> common = new HashSet<>(user.getFriends());
+        common.retainAll(other.getFriends());
+        return common.stream()
+                .map(id -> findById(id).orElseThrow())
+                .toList();
+    }
+
+    @Override
+    public Collection<User> getFriends(Long userId) {
+        User user = findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден: " + userId));
+
+        return user.getFriends().stream()
+                .map(friendId -> findById(friendId)
+                        .orElseThrow(() -> new NotFoundException("Пользователь не найден: " + friendId)))
+                .toList();
     }
 
     // вспомогательный метод для генерации идентификатора нового поста

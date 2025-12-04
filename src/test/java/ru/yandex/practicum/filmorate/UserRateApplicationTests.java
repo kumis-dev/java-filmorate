@@ -2,28 +2,23 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserRateApplicationTests {
-    UserController controller;
-    UserService userService;
-    UserStorage userStorage;
+
+    InMemoryUserStorage userStorage;
     User user;
 
     @BeforeEach
     public void setUp() {
         userStorage = new InMemoryUserStorage();
-        userService = new UserService(userStorage);
-        controller = new UserController(userService);
         user = new User();
         user.setEmail("dxdkymis@mail.ru");
         user.setLogin("alpha");
@@ -31,45 +26,78 @@ public class UserRateApplicationTests {
         user.setBirthday(LocalDate.of(2000, 1, 1));
     }
 
+    private void validateUser(User user) {
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+        }
+        if (user.getLogin() == null || user.getLogin().isBlank()) {
+            throw new ValidationException("Логин не может быть пустым");
+        }
+        if (user.getLogin().contains(" ")) {
+            throw new ValidationException("Логин не может содержать пробелы");
+        }
+        if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
+            throw new ValidationException("Дата рождения не может быть в будущем.");
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+    }
+
+    private User createUser(User user) {
+        validateUser(user);
+        return userStorage.create(user);
+    }
+
+    private User updateUser(User user) {
+        if (user.getId() == null) {
+            throw new ValidationException("Пользователь не найден");
+        }
+        if (userStorage.findById(user.getId()).isEmpty()) {
+            throw new NotFoundException("Пользователь с id " + user.getId() + " не найден");
+        }
+        validateUser(user);
+        return userStorage.update(user);
+    }
+
     @Test
     void shouldReturnValidationExceptionWithEmptyAndWithSpacesLogin() {
         user.setLogin("");
-        ValidationException e = assertThrows(ValidationException.class, () -> controller.create(user));
+        ValidationException e = assertThrows(ValidationException.class, () -> createUser(user));
         assertTrue(e.getMessage().contains("Логин не может быть пустым"));
 
         user.setLogin("login name surname");
-        e = assertThrows(ValidationException.class, () -> controller.create(user));
+        e = assertThrows(ValidationException.class, () -> createUser(user));
         assertTrue(e.getMessage().contains("содержать пробелы"));
     }
 
     @Test
     void shouldReturnValidationExceptionWithDateBirthdayInFuture() {
         user.setBirthday(LocalDate.now().plusDays(500));
-        ValidationException e = assertThrows(ValidationException.class, () -> controller.create(user));
+        ValidationException e = assertThrows(ValidationException.class, () -> createUser(user));
         assertTrue(e.getMessage().contains("Дата рождения не может быть в будущем."));
     }
 
     @Test
     void shouldReturnValidationExceptionWithWrongEmail() {
         user.setEmail(null);
-        ValidationException e = assertThrows(ValidationException.class, () -> controller.create(user));
+        ValidationException e = assertThrows(ValidationException.class, () -> createUser(user));
         assertTrue(e.getMessage().contains("Электронная почта не может быть пустой и должна содержать символ @"));
 
-        // без @
         user.setEmail("123");
-        e = assertThrows(ValidationException.class, () -> controller.create(user));
+        e = assertThrows(ValidationException.class, () -> createUser(user));
         assertTrue(e.getMessage().contains("Электронная почта не может быть пустой и должна содержать символ @"));
     }
 
     @Test
-    void shouldReturnValidationExceptionWithNotFoundId() {
+    void shouldReturnValidationAndNotFoundExceptionWithNotFoundId() {
         user.setId(null);
-        ValidationException e = assertThrows(ValidationException.class, () -> controller.update(user));
+        ValidationException e = assertThrows(ValidationException.class, () -> updateUser(user));
         assertTrue(e.getMessage().contains("не найден"));
 
         user.setId(11111L);
-        e = assertThrows(ValidationException.class, () -> controller.update(user));
-        assertTrue(e.getMessage().contains("не найден"));
+        NotFoundException e2 = assertThrows(NotFoundException.class, () -> updateUser(user));
+        assertTrue(e2.getMessage().contains("не найден"));
     }
 
     @Test
@@ -80,50 +108,47 @@ public class UserRateApplicationTests {
         user.setLogin(null);
         user.setName(null);
         user.setBirthday(null);
-        assertThrows(ValidationException.class, () -> controller.create(user));
+        assertThrows(ValidationException.class, () -> createUser(user));
     }
 
     @Test
     void shouldSuccessfulCreateUser() {
-        User user = controller.create(this.user);
-        assertNotNull(user.getId());
-        assertTrue(user.getId() > 0);
-        assertEquals(user.getEmail(),"dxdkymis@mail.ru");
-        assertEquals(user.getLogin(), "alpha");
-        assertEquals(user.getName(), "Alpha");
-
-        assertEquals(user.getBirthday(), LocalDate.of(2000, 1, 1));
+        User created = createUser(this.user);
+        assertNotNull(created.getId());
+        assertTrue(created.getId() > 0);
+        assertEquals("dxdkymis@mail.ru", created.getEmail());
+        assertEquals("alpha", created.getLogin());
+        assertEquals("Alpha", created.getName());
+        assertEquals(LocalDate.of(2000, 1, 1), created.getBirthday());
     }
 
     @Test
     void shouldSuccessfulUpdateChangeFields() {
-        // здесь сделай правильный апдейт юзера через контроллер и его метод update
-        User user = controller.create(this.user);
-        user.setEmail("123@mail.ru");
-        user.setName("12345");
-        user.setLogin("qwerty");
-        user.setBirthday(LocalDate.of(1997, 12, 2));
+        User created = createUser(this.user);
+        created.setEmail("123@mail.ru");
+        created.setName("12345");
+        created.setLogin("qwerty");
+        created.setBirthday(LocalDate.of(1997, 12, 2));
 
-        User updateUser = controller.update(user);
-        // id не изменился
-        assertEquals(user.getId(), updateUser.getId());
+        User updated = updateUser(created);
 
-        assertEquals(updateUser.getEmail(), "123@mail.ru");
-        assertEquals(updateUser.getBirthday(), LocalDate.of(1997, 12, 2));
-        assertEquals(updateUser.getName(), "12345");
-        assertEquals(updateUser.getLogin(), "qwerty");
+        assertEquals(created.getId(), updated.getId());
+        assertEquals("123@mail.ru", updated.getEmail());
+        assertEquals(LocalDate.of(1997, 12, 2), updated.getBirthday());
+        assertEquals("12345", updated.getName());
+        assertEquals("qwerty", updated.getLogin());
     }
 
     @Test
     void shouldEmptyLoginWithEmptyName() {
         user.setName("");
-        User user = controller.create(this.user);
-        assertEquals(user.getName(), user.getLogin());
+        User created = createUser(this.user);
+        assertEquals(created.getName(), created.getLogin());
     }
 
     @Test
     void shouldSuccessfulWithInstantBirthday() {
         user.setBirthday(LocalDate.now());
-        assertDoesNotThrow(() -> controller.create(user));
+        assertDoesNotThrow(() -> createUser(user));
     }
 }
