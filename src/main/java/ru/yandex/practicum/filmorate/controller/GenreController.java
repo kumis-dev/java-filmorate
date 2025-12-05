@@ -12,7 +12,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class GenreController {
 
-    private final GenreService genreService;  // Service вместо Storage
+    private final GenreService genreService;
 
     @GetMapping
     public Collection<Genre> getAllGenres() {
