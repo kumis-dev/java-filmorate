@@ -12,24 +12,25 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 @Slf4j
 public class ErrorHandler {
 
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND) // 404
-    public ErrorResponse handleNotFound(NotFoundException e) {
-        return new ErrorResponse("Объект не найден");
-    }
-
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
-    public ErrorResponse handleValidation(ValidationException e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        log.warn("Ошибка валидации: {}", e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 
-    // Самый общий обработчик - ПОСЛЕДНИМ
-    @ExceptionHandler(Throwable.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // 500
-    public ErrorResponse handleThrowable(Throwable e) {
-        log.error("Внутренняя ошибка:", e);
-        return new ErrorResponse("Внутренняя ошибка");
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFound(final NotFoundException e) {
+        log.warn("Объект не найден: {}", e.getMessage());
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleServerError(final Exception e) {
+        log.error("Unhandled error", e);
+        return new ErrorResponse("Внутренняя ошибка сервера");
     }
 }
 

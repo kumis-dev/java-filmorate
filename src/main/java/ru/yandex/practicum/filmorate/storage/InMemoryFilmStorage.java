@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -46,13 +47,29 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> findAll() {
-        return films.values();
+    public List<Film> findAll() {
+        return new ArrayList<>(films.values());
     }
 
     @Override
     public Optional<Film> findById(Long id) {
         return Optional.ofNullable(films.get(id));
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        Film film = findById(filmId)
+                .orElseThrow(() -> new NotFoundException("Film not found: " + filmId));
+        film.getLikes().add(userId);
+        log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
+    }
+
+    @Override
+    public void removeLike(Long filmId, Long userId) {
+        Film film = findById(filmId)
+                .orElseThrow(() -> new NotFoundException("Film not found: " + filmId));
+        film.getLikes().remove(userId);
+        log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
     }
 
     // вспомогательный метод для генерации идентификатора нового поста
