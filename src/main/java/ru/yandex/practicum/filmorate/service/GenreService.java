@@ -12,14 +12,14 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class GenreService {
 
-    private final GenreDbStorage genreDbStorage;
+    private final GenreDbStorage genreStorage;
 
     public Collection<Genre> findAll() {
-        return genreDbStorage.findAll();
+        return genreStorage.findAll();
     }
 
     public Genre findById(Integer id) {
-        return genreDbStorage.findById(id)
-                .orElseThrow(() -> new NotFoundException("Жанр с id=" + id + " не найден"));
+        return genreStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Жанр не найден с id: " + id));
     }
 }
